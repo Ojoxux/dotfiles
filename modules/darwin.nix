@@ -218,8 +218,8 @@ in
     enable = true;
     onActivation = {
       cleanup = "none";
-      autoUpdate = false;
-      upgrade = false;
+      autoUpdate = true;
+      upgrade = true;
     };
     casks = [
       "visual-studio-code"
