@@ -1,0 +1,9 @@
+.DS_Store
+result
+node_modules/
+.superpowers/
+docs/superpowers/
+hosts/local.nix
+config/zed/display-profiles/local*.json
+tools/*/.build/
+nvim.log

@@ -1,0 +1,40 @@
+background-blur-radius = 2
+background-opacity = 0.9
+font-family = BlexMono Nerd Font Mono
+font-size = 14
+mouse-hide-while-typing = true
+theme = dark:koda-dark,light:koda-light
+window-decoration = true
+
+# Cursor — always visible inside tmux and after AI agents.
+cursor-color = #b0b0b0
+cursor-text = #101010
+cursor-style = block
+cursor-opacity = 1
+cursor-style-blink = true
+cursor-invert-fg-bg = true
+shell-integration-features = no-cursor
+
+# Start tmux on launch so Ghostty tabs don't confuse AeroSpace.
+# Use tmux windows (Ctrl-a c) instead of Ghostty tabs (Cmd-t).
+# Ghostty launches with a minimal PATH, so include nix profile bins.
+command = sh -c 'export PATH="/etc/profiles/per-user/$USER/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"; exec tmux new -A -s main'
+
+# Let Option act as Alt for tmux shortcuts like Alt+o / Alt+e.
+macos-option-as-alt = left
+
+# Native macOS tabs are reported as separate windows to AeroSpace.
+# Use tmux windows (Ctrl-a c) instead of Ghostty tabs.
+keybind = super+t=unbind
+keybind = super+shift+[=unbind
+keybind = super+shift+]=unbind
+keybind = super+digit_1=unbind
+keybind = super+digit_2=unbind
+keybind = super+digit_3=unbind
+keybind = super+digit_4=unbind
+keybind = super+digit_5=unbind
+keybind = super+digit_6=unbind
+keybind = super+digit_7=unbind
+keybind = super+digit_8=unbind
+keybind = super+9=unbind
+keybind = super+alt+w=unbind

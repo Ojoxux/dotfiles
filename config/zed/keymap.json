@@ -1,0 +1,8 @@
+[
+  {
+    "bindings": {
+      "cmd-alt-j": "zed::IncreaseUiFontSize",
+      "cmd-alt-k": "zed::DecreaseUiFontSize"
+    }
+  }
+]

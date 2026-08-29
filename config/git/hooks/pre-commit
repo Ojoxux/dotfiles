@@ -1,0 +1,63 @@
+#!/bin/bash
+set -euo pipefail
+
+confirm() {
+  local prompt="$1"
+  local default="${2:-N}"
+
+  if [[ ! -t 0 && ! -t 1 && ! -t 2 ]]; then
+    printf "\e[33m[skip] %s (非対話モードのためデフォルト: %s)\e[0m\n" "$prompt" "$default"
+    [[ "$default" == "Y" ]]
+    return
+  fi
+
+  local ans
+  while true; do
+    printf "%s " "$prompt"
+    read -r ans < /dev/tty || ans=""
+    case "$ans" in
+      [Yy]*) return 0 ;;
+      ""|[Nn]*) return 1 ;;
+      *) printf "y か n で答えてください\n" ;;
+    esac
+  done
+}
+
+check_conflict_markers() {
+  git config --local pre-commit.skip-conflict-check | grep -qE '^(1|true|yes)$' && return
+
+  local found=0
+  while IFS= read -r -d '' file; do
+    [[ "$file" == "config/git/hooks/pre-commit" ]] && continue
+    if grep -nE '(<{7}|={7}|>{7})' "$file" >/dev/null 2>&1; then
+      found=1
+      printf "\e[31m[Error] %s にコンフリクトマーカーが残っています\e[0m\n" "$file"
+      grep -nE '(<{7}|={7}|>{7})' "$file"
+    fi
+  done < <(git diff --cached --name-only --diff-filter=AMCR -z)
+
+  if [[ $found -eq 1 ]] && ! confirm "コンフリクトマーカーが残っていますが、コミットしますか？ [y/N]:" "N"; then
+    printf "\e[31mコミットを中止します\e[0m\n"
+    exit 1
+  fi
+}
+
+check_protected_branch() {
+  git config --local pre-commit.allow-mainpush | grep -qE '^(1|true|yes)$' && return
+
+  local branch
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || return 0
+  [[ "$branch" == "HEAD" ]] && return 0
+
+  if [[ "$branch" =~ ^(master|main|develop|release([/_-].*)?)$ ]]; then
+    printf "\e[33m保護ブランチ '%s' に直接コミットしようとしています\e[0m\n" "$branch"
+    if ! confirm "本当にコミットしますか？ [y/N]:" "N"; then
+      printf "\e[31mコミットを中止します\e[0m\n"
+      exit 1
+    fi
+  fi
+}
+
+check_conflict_markers
+check_protected_branch
+exit 0

@@ -1,0 +1,81 @@
+version: "3"
+
+tasks:
+  default:
+    desc: "Show task list"
+    cmds:
+      - task --list
+
+  apply:
+    desc: "Apply HOST's Nix/dotfiles config (no package updates). Usage: task apply HOST=powehi"
+    requires:
+      vars: [HOST]
+    cmds:
+      - ~/dotfiles/apply.sh {{.HOST}}
+
+  build:
+    desc: "Build HOST's Nix/dotfiles config without applying it. Usage: task build HOST=powehi"
+    requires:
+      vars: [HOST]
+    cmds:
+      - nix run --impure ~/dotfiles#build -- {{.HOST}}
+
+  dry-run:
+    desc: "Build config and show what would change vs the running system (HOST=powehi)"
+    silent: true
+    vars:
+      HOST: '{{.HOST | default "powehi"}}'
+    cmds:
+      # この理由はAGENTS.mdに書いてもらった
+      - |
+        set -eu
+        work="$(mktemp -d)"
+        trap 'rm -rf "$work"' EXIT
+
+        echo "Building darwin configuration '{{.HOST}}' (no activation)..."
+        if command -v darwin-rebuild >/dev/null 2>&1; then
+          (cd "$work" && darwin-rebuild build --flake "$HOME/dotfiles#{{.HOST}}" --impure)
+        else
+          (cd "$work" && nix run nix-darwin/master#darwin-rebuild -- build --flake "$HOME/dotfiles#{{.HOST}}" --impure)
+        fi
+
+        new="$(readlink -f "$work/result")"
+        echo ""
+        echo "Built:   $new"
+        echo "Current: $(readlink -f /run/current-system)"
+        echo ""
+        echo "=== Closure diff (current -> new) ==="
+        changes="$(nix store diff-closures /run/current-system "$new")"
+        if [ -n "$changes" ]; then
+          echo "$changes"
+        else
+          echo "(no package changes)"
+        fi
+        echo ""
+        echo "Nothing was activated. Run 'task apply HOST={{.HOST}}' to switch."
+
+  apply:update:
+    desc: "Update Nix flake inputs, then apply HOST's config (no Homebrew updates). Usage: task apply:update HOST=powehi"
+    requires:
+      vars: [HOST]
+    cmds:
+      - ~/dotfiles/apply.sh {{.HOST}} --update
+
+  brew:update:
+    desc: "Update and upgrade remaining Homebrew-managed apps"
+    cmds:
+      - brew update
+      - brew upgrade
+
+  open:dotfiles:
+    desc: "Open dotfiles in editor ($EDITOR があれば優先, 既定は cursor)"
+    cmds:
+      - ${EDITOR:-cursor} ~/dotfiles
+
+  dev:init:
+    desc: "Initialize devbox & direnv in current directory"
+    dir: "{{.USER_WORKING_DIR}}"
+    silent: true
+    cmds:
+      - devbox init
+      - devbox generate direnv -q

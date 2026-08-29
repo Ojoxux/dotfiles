@@ -1,0 +1,28 @@
+{
+  "cli_default_open_behavior": "new_window",
+  "minimap": {
+    "show": "always",
+  },
+  "autosave": "on_window_change",
+  "title_bar": {
+    "show_branch_icon": true,
+  },
+  "agent": {
+    "tool_permissions": {
+      "default": "confirm",
+    },
+    "model_parameters": [],
+  },
+  "vim_mode": false,
+  "base_keymap": "Cursor",
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Zed (Default)",
+    "dark": "Zed (Default)",
+  },
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "Koda Monochrome Dark",
+  },
+}

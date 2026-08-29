@@ -1,0 +1,36 @@
+[user]
+	email = ojoxux@gmail.com
+	name = Jou Okuyama
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC8PFVsH8IcD3WOwIM9kjFAXxxL8AFb0tNDKfEp49N/a
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+[commit]
+	gpgsign = true
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[init]
+	defaultBranch = main
+[alias]
+	ac = !git add -A && aicommits -a
+[core]
+	pager = delta
+	hookspath = ~/.config/git/hooks
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = false
+[merge]
+	conflictstyle = zdiff3
+[credential "https://github.com"]
+	helper = 
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !gh auth git-credential
