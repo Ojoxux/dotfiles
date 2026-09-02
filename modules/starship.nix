@@ -7,7 +7,7 @@
     settings = {
       "$schema" = "https://starship.rs/config-schema.json";
       add_newline = true;
-      format = "[╭{owo} ](bold green)\$directory\$battery\$all\$line_break\$character";
+      format = "[╭ λ ](bold green)\$directory\$battery\$all\$line_break\$character";
       character = {
         success_symbol = "[╰─>](bold green)";
         error_symbol = "[x >](bold red)";
