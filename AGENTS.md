@@ -51,6 +51,14 @@ NixOS-WSL は最初 `nixos` ユーザーで起動する。`sgra` ユーザーは
 4. `sudo mv /home/nixos/dotfiles /home/sgra/ && sudo chown -R sgra:users /home/sgra/dotfiles`
 5. `cd ~/dotfiles && sudo nixos-rebuild switch --flake .#sgra` (今度は `sgra` の home-manager が正しいパスで activate)
 
+初回のうち `sgra` に system git が入るまでは `git+file://` フレーク評価が root で `git` を呼べずコケるので、その間は `--flake path:/home/nixos/dotfiles#sgra` を使う (`path:` は git を経由せずディレクトリをそのままコピーする)。
+
+### `hosts/wsl.nix` の3つの回避策
+
+1. **`programs.git` (system git + `safe.directory = "*"`)**: `sudo nixos-rebuild` は root で走り、`git+file://` フレークの評価・lock 更新で `git` を実行する。まっさらな NixOS-WSL には git が無いので入れる。さらに repo は `sgra` 所有・評価は root なので git の "dubious ownership" ガードに引っかかる。`safe.directory` で無効化。これが入る前は上記のとおり `path:` で回避。
+2. **`nix.settings` に `nix-community` cache**: `nixos-wsl` が Rust で書いた `nixos-wsl-utils` (activate スクリプト) をローカルビルドさせず既製バイナリで済ませる狙い。ただし nixpkgs のズレでヒットしないこともあり、決定打は 3。
+3. **`fetchurl` オーバーレイで crate を `static.crates.io` から取る**: この回線からは `https://crates.io/api/v1/crates/<name>/<ver>/download` (crates.io API) が 403 で、CDN の `https://static.crates.io/crates/<name>/<name>-<ver>.crate` は 200。`fetchCargoVendor` は前者を使うので、`fetchurl` を包んで URL がその形のときだけ後者に書き換える (中身同一なのでハッシュ不変)。`nixos-wsl-utils` のクレート取得がこれで通る。別回線で crates.io API が普通に通るならこのオーバーレイは無害な no-op。
+
 ### `local`特有の落とし穴
 
 1. **`hosts/local.nix`はNixのflake評価から見えない**: Nixはローカルgitリポジトリをflakeとして評価するとき、gitに追跡されていないファイルを無視する。`hosts/local.nix`は`.gitignore`対象=追跡外なので、ディスク上に存在してもエラー(`path .../hosts/local.nix does not exist`)になる。対処は、コミットはせずにgitの追跡対象にだけ乗せること:
