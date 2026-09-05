@@ -36,10 +36,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixos-wsl.url = "github:nix-community/NixOS-WSL";
   };
 
   outputs = { self, nixpkgs, nix-darwin, home-manager, determinate, brew-nix, nix-vite-plus, nixos-wsl, ... }:
