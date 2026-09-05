@@ -43,7 +43,7 @@ nixpkgs の `claude-code` は Claude Code の npm リリースから大きく遅
 
 - **そのまま再利用**: `direnv.nix` `lsd.nix` `bat.nix` `starship.nix` `fzf.nix` `zoxide.nix` `fish.nix` `nvim.nix` (nvim は `mkOutOfStoreSymlink` で `~/dotfiles/config/nvim` を指すだけ)。
 - **WSL 専用版 (`modules/wsl/`)**: 元モジュールの macOS 固有処理が 1 個の文字列 (`initContent` / `extraConfig`) の中にあり部分上書きできないので fork している。
-  - `modules/wsl/zsh.nix`: `Library/pnpm` パス, ghostty 判定での自動 `tmux exec` (darwin の `/etc/profiles` パス前提), `aerospace` エイリアス, nvm/bun/vite-plus/vscode 連携を落とした。`ts()`・tmux への `source-file`・カーソル復元・`git-wt` は残す。`~/.npm-global/bin` を PATH に追加。`nixup` を `nixos-rebuild` に張り替え。
+  - `modules/wsl/zsh.nix`: `Library/pnpm` パス, `aerospace` エイリアス, nvm/bun/vite-plus/vscode 連携を落とした。`ts()`・tmux への `source-file`・カーソル復元・`git-wt` は残す。`~/.npm-global/bin` を PATH に追加。自動 `tmux exec` は darwin の ghostty 判定 + `/etc/profiles` パスを外し、「対話シェル & tmux 外 & IDE ターミナルでない」だけに条件を絞った版に置き換え。`nixup` を `nixos-rebuild` に張り替え。
   - `modules/wsl/tmux.nix`: `shell` を `${pkgs.zsh}/bin/zsh` に、`pmset` バッテリー表示と `tmux-wifi-status` (`networksetup`/`ipconfig`) と ghostty 専用 `terminal-overrides` を削除。
   - `modules/wsl/git.nix`: 共有 `config/git/.gitconfig` を読み込んで末尾に上書きを追記する。git は同じキーの最後の値を採るので `[gpg "ssh"] program` を Windows 側 1Password 同梱の `op-ssh-sign-wsl.exe` (`/mnt/c/Users/jokuy/AppData/Local/Microsoft/WindowsApps/Agilebits.1Password_amwd9z03whsfe/op-ssh-sign-wsl.exe`) に張り替える。この helper は 1Password デスクトップアプリと直接 IPC するので、コミット署名だけなら SSH agent のブリッジ (`npiperelay`) は不要。1Password 8 のバージョンが上がってもこの `WindowsApps\Agilebits.1Password_amwd9z03whsfe\` エイリアスパスは変わらない。
 
