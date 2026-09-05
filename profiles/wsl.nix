@@ -24,6 +24,7 @@
     yq-go
     delta
     go-task
+    claude-code
   ];
 
   imports = [
