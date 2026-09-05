@@ -23,6 +23,42 @@ config/     # 実際の設定ファイル本体 (nvim, git, ghostty, zed 等)。
 
 新しく恒久的な2台目が決まったら、`hosts/powehi.nix`を真似た専用ファイル(例: `hosts/work.nix`)を作り、`flake.nix`に`darwinConfigurations.work = mkHost { file = ./hosts/work.nix; username = "..."; };`を1行足す。`local`枠は次の一時マシンのために空けておく。
 
+## ホストの考え方: `sgra` (NixOS-WSL)
+
+- **`sgra`**: Windows 端末上の NixOS-WSL 専用。ブラックホール名 (`powehi` = M87\*, `sgra` = Sagittarius A\*) で揃えていて、ここは他ホストと違い **ホスト名 (`networking.hostName`) も Linux ユーザー名も `sgra`** に統一している。適用は macOS 側の `darwin-rebuild` ではなく `sudo nixos-rebuild switch --flake ~/dotfiles#sgra` (エイリアス `nixup` を `modules/wsl/zsh.nix` で再定義済み)。
+- flake 側は `mkWslHost` ヘルパー + `nixosConfigurations.sgra` で、`nixpkgs.lib.nixosSystem` (system = `x86_64-linux`) を呼ぶ。`nix-darwin` / `determinate` / `brew-nix` / `vitePlus` は一切通さない。`dotfilesPath` は `/home/${username}/dotfiles/...` を返す。
+- `specialArgs` に `vitePlus` を渡さないので、`profiles/node.nix` など `vitePlus` 引数を取る profile はそのままでは import できない。WSL に言語 profile を足すときは Linux 用に作り直す。
+
+### なぜ `base.nix` を再利用しないのか
+
+`profiles/base.nix` は `home.homeDirectory` を `/Users/${username}` に `lib.mkForce` で固定し、`imports` も macOS 前提のモジュール (`darwin.nix` は host 側だが、`1password.nix`・`cursor.nix`・`vscode.nix`・`zed/`・`ghostty.nix`・`aerospace/hud.nix`) を含む。WSL では代わりに `profiles/wsl.nix` が Linux 用のホームディレクトリとパッケージ一覧を持ち、macOS 依存の無いモジュールだけを import する。
+
+### モジュールの再利用と WSL 専用版
+
+- **そのまま再利用**: `direnv.nix` `lsd.nix` `bat.nix` `starship.nix` `fzf.nix` `zoxide.nix` `fish.nix` `nvim.nix` (nvim は `mkOutOfStoreSymlink` で `~/dotfiles/config/nvim` を指すだけ)。
+- **WSL 専用版 (`modules/wsl/`)**: 元モジュールの macOS 固有処理が 1 個の文字列 (`initContent` / `extraConfig`) の中にあり部分上書きできないので fork している。
+  - `modules/wsl/zsh.nix`: `Library/pnpm` パス, ghostty 判定での自動 `tmux exec` (darwin の `/etc/profiles` パス前提), `aerospace` エイリアス, nvm/bun/vite-plus/vscode 連携を落とした。`ts()`・tmux への `source-file`・カーソル復元・`git-wt` は残す。`nixup` を `nixos-rebuild` に張り替え。
+  - `modules/wsl/tmux.nix`: `shell` を `${pkgs.zsh}/bin/zsh` に、`pmset` バッテリー表示と `tmux-wifi-status` (`networksetup`/`ipconfig`) と ghostty 専用 `terminal-overrides` を削除。
+  - `modules/wsl/git.nix`: 共有 `config/git/.gitconfig` を読み込んで末尾に上書きを追記する。git は同じキーの最後の値を採るので `[gpg "ssh"] program` を Windows 側 1Password 同梱の `op-ssh-sign-wsl.exe` (`/mnt/c/Users/jokuy/AppData/Local/Microsoft/WindowsApps/Agilebits.1Password_amwd9z03whsfe/op-ssh-sign-wsl.exe`) に張り替える。この helper は 1Password デスクトップアプリと直接 IPC するので、コミット署名だけなら SSH agent のブリッジ (`npiperelay`) は不要。1Password 8 のバージョンが上がってもこの `WindowsApps\Agilebits.1Password_amwd9z03whsfe\` エイリアスパスは変わらない。
+
+### 初回セットアップの順序 (chicken-and-egg)
+
+NixOS-WSL は最初 `nixos` ユーザーで起動する。`sgra` ユーザーは初回 `nixos-rebuild switch --flake .#sgra` で初めて作られるが、その時点でリポジトリは `/home/nixos/dotfiles` にあり `dotfilesPath` が期待する `/home/sgra/dotfiles` とズレる。手順:
+
+1. NixOS-WSL を入れて `nixos` で起動、`nix-shell -p git` 等で `git clone` → `/home/nixos/dotfiles`
+2. `sudo nixos-rebuild switch --flake /home/nixos/dotfiles#sgra` (ここで `sgra` ユーザーが作られる)
+3. `wsl --shutdown` して再起動 → ログインユーザーが `sgra` になる
+4. `sudo mv /home/nixos/dotfiles /home/sgra/ && sudo chown -R sgra:users /home/sgra/dotfiles`
+5. `cd ~/dotfiles && sudo nixos-rebuild switch --flake .#sgra` (今度は `sgra` の home-manager が正しいパスで activate)
+
+初回のうち `sgra` に system git が入るまでは `git+file://` フレーク評価が root で `git` を呼べずコケるので、その間は `--flake path:/home/nixos/dotfiles#sgra` を使う (`path:` は git を経由せずディレクトリをそのままコピーする)。
+
+### `hosts/wsl.nix` の3つの回避策
+
+1. **`programs.git` (system git + `safe.directory = "*"`)**: `sudo nixos-rebuild` は root で走り、`git+file://` フレークの評価・lock 更新で `git` を実行する。まっさらな NixOS-WSL には git が無いので入れる。さらに repo は `sgra` 所有・評価は root なので git の "dubious ownership" ガードに引っかかる。`safe.directory` で無効化。これが入る前は上記のとおり `path:` で回避。
+2. **`nix.settings` に `nix-community` cache**: `nixos-wsl` が Rust で書いた `nixos-wsl-utils` (activate スクリプト) をローカルビルドさせず既製バイナリで済ませる狙い。ただし nixpkgs のズレでヒットしないこともあり、決定打は 3。
+3. **`fetchurl` オーバーレイで crate を `static.crates.io` から取る**: この回線からは `https://crates.io/api/v1/crates/<name>/<ver>/download` (crates.io API) が 403 で、CDN の `https://static.crates.io/crates/<name>/<name>-<ver>.crate` は 200。`fetchCargoVendor` は前者を使うので、`fetchurl` を包んで URL がその形のときだけ後者に書き換える (中身同一なのでハッシュ不変)。`nixos-wsl-utils` のクレート取得がこれで通る。別回線で crates.io API が普通に通るならこのオーバーレイは無害な no-op。
+
 ### `local`特有の落とし穴
 
 1. **`hosts/local.nix`はNixのflake評価から見えない**: Nixはローカルgitリポジトリをflakeとして評価するとき、gitに追跡されていないファイルを無視する。`hosts/local.nix`は`.gitignore`対象=追跡外なので、ディスク上に存在してもエラー(`path .../hosts/local.nix does not exist`)になる。対処は、コミットはせずにgitの追跡対象にだけ乗せること:
