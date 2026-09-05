@@ -33,6 +33,8 @@ config/     # 実際の設定ファイル本体 (nvim, git, ghostty, zed 等)。
 
 nixpkgs の `claude-code` は Claude Code の npm リリースから大きく遅れる (実測 `2.1.133` vs npm `2.1.261`)。CLI バージョンに利用可能モデルがクライアント側で紐付くため、鮮度が実用に効く。そこで mac (`profiles/node.nix` + `powehi-only.nix`) と同じく `nix-vite-plus` の `vp` を通し、`~/.vite-plus/bin/claude` (npm グローバル、自動更新) を使う。`profiles/wsl.nix` が `~/.local/bin/{vp,node,npm,npx,...}` を `vp` へリンクし、`modules/wsl/zsh.nix` が `~/.vite-plus/env` を source する。初回だけ `npm i -g @anthropic-ai/claude-code` が必要。
 
+`vp` は generic Linux の Node バイナリを落としてくるが、NixOS は FHS のダイナミックリンク実行ファイルを素で動かせず `Could not start dynamically linked executable: node` で落ちる。`hosts/sgra.nix` の `programs.nix-ld.enable = true` でスタブローダ + `NIX_LD` を用意して回避する (VS Code server 等の他の外部バイナリにも効く)。
+
 ### なぜ `base.nix` を再利用しないのか
 
 `profiles/base.nix` は `home.homeDirectory` を `/Users/${username}` に `lib.mkForce` で固定し、`imports` も macOS 前提のモジュール (`darwin.nix` は host 側だが、`1password.nix`・`cursor.nix`・`vscode.nix`・`zed/`・`ghostty.nix`・`aerospace/hud.nix`) を含む。WSL では代わりに `profiles/wsl.nix` が Linux 用のホームディレクトリとパッケージ一覧を持ち、macOS 依存の無いモジュールだけを import する。
