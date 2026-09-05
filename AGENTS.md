@@ -53,7 +53,7 @@ NixOS-WSL は最初 `nixos` ユーザーで起動する。`sgra` ユーザーは
 
 初回のうち `sgra` に system git が入るまでは `git+file://` フレーク評価が root で `git` を呼べずコケるので、その間は `--flake path:/home/nixos/dotfiles#sgra` を使う (`path:` は git を経由せずディレクトリをそのままコピーする)。
 
-### `hosts/wsl.nix` の3つの回避策
+### `hosts/sgra.nix` の3つの回避策
 
 1. **`programs.git` (system git + `safe.directory = "*"`)**: `sudo nixos-rebuild` は root で走り、`git+file://` フレークの評価・lock 更新で `git` を実行する。まっさらな NixOS-WSL には git が無いので入れる。さらに repo は `sgra` 所有・評価は root なので git の "dubious ownership" ガードに引っかかる。`safe.directory` で無効化。これが入る前は上記のとおり `path:` で回避。
 2. **`nix.settings` に `nix-community` cache**: `nixos-wsl` が Rust で書いた `nixos-wsl-utils` (activate スクリプト) をローカルビルドさせず既製バイナリで済ませる狙い。ただし nixpkgs のズレでヒットしないこともあり、決定打は 3。
