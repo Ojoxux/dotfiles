@@ -25,6 +25,10 @@
     };
 
     initContent = ''
+      if [[ -o interactive && -z "$TMUX" && "$TERM_PROGRAM" != "vscode" && -z "$VSCODE_INJECTION" && -z "$INSIDE_EMACS" ]] && command -v tmux >/dev/null; then
+        exec tmux new -A -s main
+      fi
+
       ts() {
         local session="''${1:-main}"
         if [[ -n "$TMUX" ]]; then
