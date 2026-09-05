@@ -35,9 +35,14 @@
       url = "github:ryoppippi/nix-vite-plus";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, determinate, brew-nix, nix-vite-plus, ... }:
+  outputs = { self, nixpkgs, nix-darwin, home-manager, determinate, brew-nix, nix-vite-plus, nixos-wsl, ... }:
     let
       pkgs = nixpkgs.legacyPackages.aarch64-darwin;
 
@@ -56,6 +61,21 @@
           vitePlus = nix-vite-plus.packages.aarch64-darwin.vp;
         };
       };
+
+      # NixOS-WSL host. macOS 側と違い nix-darwin / Homebrew は無い。
+      # username 依存の暗黙デフォルトを避けるため username は呼び出し側で明示する。
+      mkWslHost = { file, username }: nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          nixos-wsl.nixosModules.default
+          home-manager.nixosModules.home-manager
+          file
+        ];
+        specialArgs = {
+          inherit username;
+          dotfilesPath = path: "/home/${username}/dotfiles/${path}";
+        };
+      };
     in
     {
       darwinConfigurations.powehi = mkHost { file = ./hosts/powehi.nix; username = "Ojoxux"; };
@@ -70,6 +90,12 @@
       darwinConfigurations.check = mkHost {
         file = ./hosts/local.example.nix;
         username = "Ojoxux";
+      };
+
+      # ブラックホール名で powehi と揃える (ホスト名 = Linux ユーザー名 = sgra)。
+      nixosConfigurations.sgra = mkWslHost {
+        file = ./hosts/wsl.nix;
+        username = "sgra";
       };
 
       apps.aarch64-darwin = {
