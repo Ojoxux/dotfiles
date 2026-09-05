@@ -91,7 +91,7 @@
 
       # ブラックホール名で powehi と揃える (ホスト名 = Linux ユーザー名 = sgra)。
       nixosConfigurations.sgra = mkWslHost {
-        file = ./hosts/wsl.nix;
+        file = ./hosts/sgra.nix;
         username = "sgra";
       };
 
