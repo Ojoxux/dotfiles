@@ -1,10 +1,20 @@
-{ lib, pkgs, username, ... }:
+{ lib, pkgs, username, vitePlus, ... }:
 {
   home.username = username;
   home.homeDirectory = lib.mkForce "/home/${username}";
   home.stateVersion = "24.11";
 
   programs.home-manager.enable = true;
+
+  home.file = {
+    ".local/bin/vp".source = "${vitePlus}/bin/vp";
+    ".local/bin/vpr".source = "${vitePlus}/bin/vpr";
+    ".local/bin/vpx".source = "${vitePlus}/bin/vpx";
+    ".local/bin/node".source = "${vitePlus}/bin/vp";
+    ".local/bin/npm".source = "${vitePlus}/bin/vp";
+    ".local/bin/npx".source = "${vitePlus}/bin/vp";
+    ".local/bin/corepack".source = "${vitePlus}/bin/vp";
+  };
 
   home.packages = with pkgs; [
     git
@@ -24,7 +34,6 @@
     yq-go
     delta
     go-task
-    claude-code
   ];
 
   imports = [

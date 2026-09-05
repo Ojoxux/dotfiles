@@ -71,6 +71,7 @@
         specialArgs = {
           inherit username;
           dotfilesPath = path: "/home/${username}/dotfiles/${path}";
+          vitePlus = nix-vite-plus.packages.x86_64-linux.vp;
         };
       };
     in

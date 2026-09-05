@@ -26,8 +26,12 @@ config/     # 実際の設定ファイル本体 (nvim, git, ghostty, zed 等)。
 ## ホストの考え方: `sgra` (NixOS-WSL)
 
 - **`sgra`**: Windows 端末上の NixOS-WSL 専用。ブラックホール名 (`powehi` = M87\*, `sgra` = Sagittarius A\*) で揃えていて、ここは他ホストと違い **ホスト名 (`networking.hostName`) も Linux ユーザー名も `sgra`** に統一している。適用は macOS 側の `darwin-rebuild` ではなく `sudo nixos-rebuild switch --flake ~/dotfiles#sgra` (エイリアス `nixup` を `modules/wsl/zsh.nix` で再定義済み)。
-- flake 側は `mkWslHost` ヘルパー + `nixosConfigurations.sgra` で、`nixpkgs.lib.nixosSystem` (system = `x86_64-linux`) を呼ぶ。`nix-darwin` / `determinate` / `brew-nix` / `vitePlus` は一切通さない。`dotfilesPath` は `/home/${username}/dotfiles/...` を返す。
-- `specialArgs` に `vitePlus` を渡さないので、`profiles/node.nix` など `vitePlus` 引数を取る profile はそのままでは import できない。WSL に言語 profile を足すときは Linux 用に作り直す。
+- flake 側は `mkWslHost` ヘルパー + `nixosConfigurations.sgra` で、`nixpkgs.lib.nixosSystem` (system = `x86_64-linux`) を呼ぶ。`nix-darwin` / `determinate` / `brew-nix` は通さない。`dotfilesPath` は `/home/${username}/dotfiles/...` を返す。`vitePlus` は `x86_64-linux` 版を `specialArgs` / `extraSpecialArgs` で渡している。
+- `profiles/node.nix` 等の macOS 用言語 profile は `./base.nix` を import しているのでそのままでは使えない。WSL に言語 profile を足すときは Linux 用に作り直す。
+
+### `claude` は vite-plus 経由 (nixpkgs 版は使わない)
+
+nixpkgs の `claude-code` は Claude Code の npm リリースから大きく遅れる (実測 `2.1.133` vs npm `2.1.261`)。CLI バージョンに利用可能モデルがクライアント側で紐付くため、鮮度が実用に効く。そこで mac (`profiles/node.nix` + `powehi-only.nix`) と同じく `nix-vite-plus` の `vp` を通し、`~/.vite-plus/bin/claude` (npm グローバル、自動更新) を使う。`profiles/wsl.nix` が `~/.local/bin/{vp,node,npm,npx,...}` を `vp` へリンクし、`modules/wsl/zsh.nix` が `~/.vite-plus/env` を source する。初回だけ `npm i -g @anthropic-ai/claude-code` が必要。
 
 ### なぜ `base.nix` を再利用しないのか
 
@@ -37,7 +41,7 @@ config/     # 実際の設定ファイル本体 (nvim, git, ghostty, zed 等)。
 
 - **そのまま再利用**: `direnv.nix` `lsd.nix` `bat.nix` `starship.nix` `fzf.nix` `zoxide.nix` `fish.nix` `nvim.nix` (nvim は `mkOutOfStoreSymlink` で `~/dotfiles/config/nvim` を指すだけ)。
 - **WSL 専用版 (`modules/wsl/`)**: 元モジュールの macOS 固有処理が 1 個の文字列 (`initContent` / `extraConfig`) の中にあり部分上書きできないので fork している。
-  - `modules/wsl/zsh.nix`: `Library/pnpm` パス, ghostty 判定での自動 `tmux exec` (darwin の `/etc/profiles` パス前提), `aerospace` エイリアス, nvm/bun/vite-plus/vscode 連携を落とした。`ts()`・tmux への `source-file`・カーソル復元・`git-wt` は残す。`nixup` を `nixos-rebuild` に張り替え。
+  - `modules/wsl/zsh.nix`: `Library/pnpm` パス, ghostty 判定での自動 `tmux exec` (darwin の `/etc/profiles` パス前提), `aerospace` エイリアス, nvm/bun/vscode 連携を落とした。`ts()`・tmux への `source-file`・カーソル復元・`git-wt`・`~/.vite-plus/env` の source は残す。`nixup` を `nixos-rebuild` に張り替え。
   - `modules/wsl/tmux.nix`: `shell` を `${pkgs.zsh}/bin/zsh` に、`pmset` バッテリー表示と `tmux-wifi-status` (`networksetup`/`ipconfig`) と ghostty 専用 `terminal-overrides` を削除。
   - `modules/wsl/git.nix`: 共有 `config/git/.gitconfig` を読み込んで末尾に上書きを追記する。git は同じキーの最後の値を採るので `[gpg "ssh"] program` を Windows 側 1Password 同梱の `op-ssh-sign-wsl.exe` (`/mnt/c/Users/jokuy/AppData/Local/Microsoft/WindowsApps/Agilebits.1Password_amwd9z03whsfe/op-ssh-sign-wsl.exe`) に張り替える。この helper は 1Password デスクトップアプリと直接 IPC するので、コミット署名だけなら SSH agent のブリッジ (`npiperelay`) は不要。1Password 8 のバージョンが上がってもこの `WindowsApps\Agilebits.1Password_amwd9z03whsfe\` エイリアスパスは変わらない。
 
