@@ -1,4 +1,4 @@
-{ pkgs, username, dotfilesPath, vitePlus, ... }:
+{ pkgs, username, dotfilesPath, ... }:
 {
   wsl.enable = true;
   wsl.defaultUser = username;
@@ -56,7 +56,7 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = { inherit username dotfilesPath vitePlus; };
+  home-manager.extraSpecialArgs = { inherit username dotfilesPath; };
   home-manager.users.${username} = {
     imports = [ ../profiles/wsl.nix ];
   };

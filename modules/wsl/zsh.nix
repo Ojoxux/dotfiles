@@ -53,9 +53,7 @@
 
       [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
-      [ -f "$HOME/.vite-plus/env" ] && . "$HOME/.vite-plus/env"
-
-      export PATH="$HOME/.local/bin:$PATH"
+      export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
 
       command -v git-wt >/dev/null && eval "$(git-wt --init zsh)"
     '';
