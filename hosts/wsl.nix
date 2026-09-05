@@ -19,6 +19,11 @@
 
   programs.zsh.enable = true;
 
+  programs.git = {
+    enable = true;
+    config.safe.directory = "*";
+  };
+
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
