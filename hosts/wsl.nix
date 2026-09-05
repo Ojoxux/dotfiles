@@ -15,6 +15,23 @@
     "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
   ];
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      fetchurl = args:
+        let
+          m =
+            if args ? url && builtins.isString args.url
+            then builtins.match "https://crates\\.io/api/v1/crates/([^/]+)/([^/]+)/download" args.url
+            else null;
+        in
+        if m == null
+        then prev.fetchurl args
+        else prev.fetchurl (args // {
+          url = "https://static.crates.io/crates/${builtins.elemAt m 0}/${builtins.elemAt m 0}-${builtins.elemAt m 1}.crate";
+        });
+    })
+  ];
+
   system.stateVersion = "24.11";
 
   users.users.${username} = {
