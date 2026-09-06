@@ -42,5 +42,6 @@
     ../modules/wsl/zsh.nix
     ../modules/wsl/tmux.nix
     ../modules/wsl/git.nix
+    ../modules/wsl/wezterm.nix
   ];
 }
