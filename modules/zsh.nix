@@ -12,6 +12,7 @@
 
     shellAliases = {
       nixup = "task -d ~/dotfiles apply HOST=powehi";
+      pn = "pnpm";
       tls = "tmux list-sessions";
       treload = "tmux source-file ~/.config/tmux/tmux.conf && tmux display-message 'tmux reloaded'";
       cursor = "printf '\\e[?25h\\e[2 q'";
