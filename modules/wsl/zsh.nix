@@ -19,12 +19,9 @@
       sv = "tmux split-window -v";
     };
 
-    sessionVariables = {
-      MY_USER = "$(whoami)";
-      MY_HOST = "$(hostname -s)";
-    };
-
     initContent = ''
+      export MY_USER="$(whoami)"
+      export MY_HOST="$(hostname -s)"
       if [[ -o interactive && -z "$TMUX" && "$TERM_PROGRAM" != "vscode" && -z "$VSCODE_INJECTION" && -z "$INSIDE_EMACS" ]] && command -v tmux >/dev/null; then
         exec tmux new -A -s main
       fi
