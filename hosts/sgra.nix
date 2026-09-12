@@ -45,12 +45,10 @@
   security.sudo.wheelNeedsPassword = false;
 
   programs.zsh.enable = true;
-
   programs.nix-ld.enable = true;
 
   programs.git = {
     enable = true;
-    config.safe.directory = "*";
   };
 
   home-manager.useGlobalPkgs = true;
