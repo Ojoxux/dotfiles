@@ -13,7 +13,6 @@
     extraConfig = ''
       set-hook -g client-attached 'source-file ~/.config/tmux/tmux.conf \; send-keys -H 1b5b3f3235681b5b322071'
       set-option -g renumber-windows on
-      # Monochrome tmux theme
       set-option -g status-position bottom
       set-option -g status-interval 1
       set-option -g status-justify centre
@@ -41,10 +40,8 @@
       set-hook -g pane-focus-in 'send-keys -H 1b5b3f3235681b5b322071'
       set-hook -g client-focus-in 'send-keys -H 1b5b3f3235681b5b322071'
 
-      # macOS clipboard integration
       set-option -g set-clipboard on
 
-      # Panes
       bind h select-pane -L
       bind j select-pane -D
       bind k select-pane -U
@@ -61,7 +58,6 @@
       bind e split-window -v -c "#{pane_current_path}"
       bind x kill-pane
 
-      # No-prefix shortcuts (left Option + key)
       bind -n M-o split-window -h -c "#{pane_current_path}"
       bind -n M-e split-window -v -c "#{pane_current_path}"
       bind -n M-h select-pane -L
@@ -69,7 +65,6 @@
       bind -n M-k select-pane -U
       bind -n M-l select-pane -R
 
-      # Windows (use these instead of Ghostty tabs)
       bind c new-window -c "#{pane_current_path}"
       bind w choose-window
       bind n next-window
@@ -77,10 +72,8 @@
       bind , command-prompt -I "#W" "rename-window '%%'"
       bind & confirm-before -p "kill window #I? (y/n)" kill-window
 
-      # Sessions (switch projects without nesting tmux)
       bind s choose-session
 
-      # Copy mode
       bind -T copy-mode-vi v send -X begin-selection
       bind -T copy-mode-vi V send -X select-line
       bind -T copy-mode-vi C-v send -X rectangle-toggle

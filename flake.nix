@@ -59,8 +59,6 @@
         };
       };
 
-      # NixOS-WSL host. macOS 側と違い nix-darwin / Homebrew は無い。
-      # username 依存の暗黙デフォルトを避けるため username は呼び出し側で明示する。
       mkWslHost = { file, username }: nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
@@ -89,7 +87,6 @@
         username = "Ojoxux";
       };
 
-      # ブラックホール名で powehi と揃える (ホスト名 = Linux ユーザー名 = sgra)。
       nixosConfigurations.sgra = mkWslHost {
         file = ./hosts/sgra.nix;
         username = "sgra";

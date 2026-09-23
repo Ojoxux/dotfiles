@@ -17,6 +17,8 @@
 
   nixpkgs.config.allowUnfree = true;
 
+  environment.variables.SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+
   nixpkgs.overlays = [
     (final: prev: {
       fetchurl = args:
@@ -36,9 +38,11 @@
 
   system.stateVersion = "24.11";
 
+  virtualisation.docker.enable = true;
+
   users.users.${username} = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "docker" ];
     shell = pkgs.zsh;
   };
 

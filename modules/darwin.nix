@@ -31,7 +31,6 @@ in
   nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = "aarch64-darwin";
 
-  # Determinate Nix manages the daemon and nix.conf; nix-darwin must not take over.
   nix.enable = false;
 
   system.activationScripts.preActivation.text = ''
@@ -41,7 +40,6 @@ in
   '';
 
   system.activationScripts.postActivation.text = lib.optionalString config.services.aerospace.enable ''
-    # Rectangle conflicts with AeroSpace; keep it stopped when tiling WM is active.
     if /usr/bin/pgrep -x Rectangle >/dev/null 2>&1; then
       /usr/bin/osascript -e 'tell application "Rectangle" to quit' 2>/dev/null || true
     fi
@@ -53,7 +51,6 @@ in
     determinateNixd.garbageCollector.strategy = "disabled";
   };
 
-  # nix.gc は nix.enable = false では使えないため launchd で代替
   launchd.daemons.nix-gc = {
     serviceConfig = {
       Label = "org.nixos.nix-gc";
@@ -138,11 +135,9 @@ in
         ctrl-tab = "workspace-back-and-forth";
         ctrl-shift-tab = "move-workspace-to-monitor --wrap-around next";
 
-        # Service mode (avoid semicolon; awkward on JIS and blocked by Electron apps)
         ctrl-shift-0 = "mode service";
         ctrl-shift-semicolon = "mode service";
 
-        # Reset layout without service mode (works when Codex/Cursor capture other keys)
         ctrl-shift-r = "flatten-workspace-tree";
         ctrl-alt-r = "flatten-workspace-tree";
         ctrl-alt-shift-r = "flatten-workspace-tree";
