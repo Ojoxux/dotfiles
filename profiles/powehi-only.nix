@@ -1,10 +1,5 @@
 { pkgs, ... }:
 let
-  # codexはcode-mode-hostを「自分と同じディレクトリにあるバイナリ」としてしか探さないため
-  # ~/.local/binのような別PATHに置いても効果がない。home.packagesのbuildEnvで
-  # brewCasks.codexと同じbinディレクトリにsymlinkされるようにする必要がある。
-  # 本体とバージョンが常に一致している必要がある特例なので、fetchurlのhash固定はせず
-  # builtins.fetchTarball(--impureなので毎回codexの実バージョンに追従して取得)を使う。
   codexCodeModeHost = pkgs.runCommand "codex-code-mode-host-${pkgs.brewCasks.codex.version}" { } ''
     mkdir -p $out/bin
     install -m755 ${builtins.fetchTarball {
@@ -16,7 +11,6 @@ in
   imports = [ ./base.nix ];
 
   home.packages = with pkgs; [
-    # brewCasks.codexは0.153.4以降bin/codexを直接提供するようになったため、ラッパー不要
     brewCasks.codex
     codexCodeModeHost
     brewCasks.cursor
@@ -24,8 +18,6 @@ in
     brewCasks.figma
     brewCasks.webots
 
-    # 試験導入中: 既存の ~/.vite-plus/bin/claude とは別名で共存させ、様子を見る。
-    # 問題なさそうならこの部分を書き換えて "claude" コマンド自体を置き換える。
     (writeShellScriptBin "claude-nix" ''
       exec ${claude-code}/bin/claude "$@"
     '')

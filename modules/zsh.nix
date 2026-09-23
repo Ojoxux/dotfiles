@@ -81,7 +81,6 @@
 
       export PATH="$HOME/.local/bin:$PATH"
 
-      # git wt でワークツリーへ自動 cd する（wrapper 関数と補完を読み込む）
       command -v git-wt >/dev/null && eval "$(git-wt --init zsh)"
     '';
   };

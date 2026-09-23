@@ -1,4 +1,3 @@
-# WezTerm.exe は Windows ホーム (%USERPROFILE%\.wezterm.lua) しか読まないので switch のたびにコピーする
 { lib, dotfilesPath, ... }:
 let
   src = dotfilesPath "config/wezterm/wezterm.lua";
