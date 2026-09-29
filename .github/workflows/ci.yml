@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - name: Link checkout to the path expected by dotfilesPath
+        run: |
+          sudo mkdir -p /Users/Ojoxux
+          sudo ln -s "$GITHUB_WORKSPACE" /Users/Ojoxux/dotfiles
+      - name: Evaluate darwinConfigurations.check
+        run: nix eval --impure --raw .#darwinConfigurations.check.config.system.build.toplevel.drvPath
+      - name: Evaluate darwinConfigurations.powehi
+        run: nix eval --impure --raw .#darwinConfigurations.powehi.config.system.build.toplevel.drvPath
+      - name: Evaluate nixosConfigurations.sgra
+        run: nix eval --raw .#nixosConfigurations.sgra.config.system.build.toplevel.drvPath
