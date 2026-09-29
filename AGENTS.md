@@ -105,6 +105,7 @@ powehi固有機能。内蔵ディスプレイの割れた部分を避けるた�
 
 ## その他の個別事情
 
+- **flake.lockの自動更新** (`.github/workflows/update-flake-lock.yml`): 毎週月曜0時(UTC)に`DeterminateSystems/update-flake-lock`が`nix flake update`してPRを作る。PRの作成までを自動化していて、マージと`task apply`は手元で確認してから行う。理由: nixpkgsが更新されると数百のderivationが再ビルドされることがあり、`darwin-rebuild`はmacOS専用でhomebrewや`--impure`も絡むためCIで実機と同じ検証ができない。`GITHUB_TOKEN`で作ったPRは他のworkflowを起動しない仕様なので、PRに対するCIは今のところ無い。
 - **zeno.zsh** (`modules/zeno.nix`): nixpkgsの`zeno`パッケージは無関係のツールなので本体をGitHubから直接取得している。上流は`deno --node-modules-dir=auto`を呼ぶが、`auto`は読み取り専用の`/nix/store`内に`node_modules`を作ろうとして失敗する。npm依存が`yargs-parser`のみなので`--node-modules-dir=none`にパッチして`deno`のグローバルキャッシュから解決させている。
 - **`app-only`系のprofile** (`profiles/powehi-only.nix`): `brewCasks.*`は`modules/darwin.nix`の`homebrew.casks`(実際に`brew bundle`でインストールする)とは別物で、`brew-nix`フレークが提供する、Homebrew配布物をNixパッケージとして参照する仕組み。CLI的に使うものはこちら、GUIアプリで署名・自動更新・権限まわりが絡むものは`homebrew.casks`、という使い分け。`brewCasks.codex`の実体は`codex-aarch64-apple-darwin`という名前なので、普段使う`codex`コマンドとして呼べるようラッパーを被せている。`claude-nix`は既存の`~/.vite-plus/bin/claude`と別名で共存させる試験導入中の名前(問題なければ`claude`自体を置き換える想定)。
 - **Determinate Nix**: `nix.enable = false`としてnix-darwin本体にはNixデーモン管理をさせず、Determinate Nixに任せている。`nix.gc`が使えないため、ガベージコレクションはlaunchdデーモン(`modules/darwin.nix`の`launchd.daemons.nix-gc`)で代替している。
