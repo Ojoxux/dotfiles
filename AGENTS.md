@@ -97,7 +97,7 @@ powehi固有機能。内蔵ディスプレイの割れた部分を避けるた�
 ## その他の個別事情
 
 - **flake.lockの自動更新** (`.github/workflows/update-flake-lock.yml`): 毎週月曜0時(UTC)に`DeterminateSystems/update-flake-lock`が`nix flake update`してPRを作る。PRの作成までを自動化していて、マージと`task apply`は手元で確認してから行う。理由: nixpkgsが更新されると数百のderivationが再ビルドされることがあり、`darwin-rebuild`はmacOS専用でhomebrewや`--impure`も絡むためCIで実機と同じ検証ができない。`GITHUB_TOKEN`で作ったPRは他のworkflowを起動しない仕様なので、PRに対するCIは今のところ無い。
-- **zeno.zsh** (`modules/zeno.nix`): nixpkgsの`zeno`パッケージは無関係のツールなので本体をGitHubから直接取得している。上流は`deno --node-modules-dir=auto`を呼ぶが、`auto`は読み取り専用の`/nix/store`内に`node_modules`を作ろうとして失敗する。npm依存が`yargs-parser`のみなので`--node-modules-dir=none`にパッチして`deno`のグローバルキャッシュから解決させている。
+- **zeno.zsh** (`modules/zeno.nix`): nixpkgsの`zeno`パッケージは無関係のツールなので本体をGitHubから直接取得している。上流は`deno --node-modules-dir=auto`を呼ぶが、`auto`は読み取り専用の`/nix/store`内に`node_modules`を作ろうとして失敗する。npm依存が`yargs-parser`のみなので`--node-modules-dir=none`にパッチして`deno`のグローバルキャッシュから解決させている。また上流は`deno run <flags> -- <script>.ts`と呼ぶが、deno 2.9系は`--`以降をスクリプトとして扱わず「スクリプト未指定→`deno task`」でエラー終了する。するとソケットサーバーが起動せず、毎プロンプトの`zeno-history-precmd`がサーバー起動待ち(最大5秒)+フォールバックで約5秒ブロックするため、`--`を取り除くパッチも当てている。
 - **`brewCasks.*`と`homebrew.casks`の使い分け** (`profiles/powehi-only.nix`): `brewCasks.*`は`brew-nix`フレークが提供する、Homebrew配布物をNixパッケージとして参照する仕組み。CLI的に使うものはこちら、GUIアプリで署名・自動更新・権限まわりが絡むものは`homebrew.casks`。
 - **codexの`code-mode-host`** (`profiles/powehi-only.nix`): codexは`code-mode-host`を自分と同じディレクトリのバイナリとしてしか探さないので、`~/.local/bin`等に置いても効かず、`home.packages`で`brewCasks.codex`と同じbinにsymlinkされる必要がある。本体とバージョンが常に一致している必要があるため、hash固定の`fetchurl`ではなく`builtins.fetchTarball`(`--impure`で毎回codexの実バージョンに追従)で取る。
 - **`claude-nix`** (`profiles/powehi-only.nix`): 既存の`~/.vite-plus/bin/claude`と別名で共存させる試験導入中の名前。問題なければ`claude`自体を置き換える想定。
