@@ -18,6 +18,13 @@ let
       fi
       substituteInPlace $files \
         --replace-fail '--node-modules-dir=auto' '--node-modules-dir=none'
+
+      files=$(grep -rlE -- '-- "[^"]*/src/(cli|server)\.ts"' bin shells)
+      if [ -z "$files" ]; then
+        echo "zeno.zsh: deno run の -- が見つからない。上流が変わった可能性がある" >&2
+        exit 1
+      fi
+      sed -i -E 's#-- ("[^"]*/src/(cli|server)\.ts")#\1#' $files
     '';
   };
 in
