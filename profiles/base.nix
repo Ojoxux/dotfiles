@@ -48,7 +48,6 @@
     ../modules/fish.nix
     ../modules/zsh.nix
 
-    ../modules/cursor.nix
     ../modules/vscode.nix
     ../modules/nvim.nix
     ../modules/zed

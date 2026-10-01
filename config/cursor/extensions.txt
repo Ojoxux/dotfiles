@@ -1,4 +1,0 @@
-# Cursor extensions list
-# Export: cursor-export-extensions ~/dotfiles/config/cursor/extensions.txt
-# Sync:   cursor-sync-extensions
-esbenp.prettier-vscode

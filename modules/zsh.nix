@@ -68,7 +68,6 @@
       export BUN_INSTALL="$HOME/.bun"
       export PATH="$BUN_INSTALL/bin:$PATH"
 
-      [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(cursor --locate-shell-integration-path zsh)"
       [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
 
       [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"

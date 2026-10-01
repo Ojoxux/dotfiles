@@ -68,9 +68,9 @@ tasks:
       - brew upgrade
 
   open:dotfiles:
-    desc: "Open dotfiles in editor ($EDITOR があれば優先, 既定は cursor)"
+    desc: "Open dotfiles in editor ($EDITOR があれば優先, 既定は zed)"
     cmds:
-      - ${EDITOR:-cursor} ~/dotfiles
+      - ${EDITOR:-zed} ~/dotfiles
 
   dev:init:
     desc: "Initialize devbox & direnv in current directory"
