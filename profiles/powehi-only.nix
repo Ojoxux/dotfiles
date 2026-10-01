@@ -13,7 +13,6 @@ in
   home.packages = with pkgs; [
     brewCasks.codex
     codexCodeModeHost
-    brewCasks.cursor
     brewCasks.arc
     brewCasks.figma
     brewCasks.webots

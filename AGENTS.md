@@ -92,7 +92,7 @@ powehi固有機能。内蔵ディスプレイの割れた部分を避けるた�
 
 - Rectangleはウィンドウ操作がAeroSpaceと衝突するので、AeroSpaceが有効なときはactivationで終了させ、ログイン項目からも外す。
 - service modeには`ctrl-shift-0`も割り当てている。`ctrl-shift-semicolon`はJISキーボードで押しにくく、Electronアプリに横取りされることもあるため。
-- service modeを経由しないレイアウトリセット(`flatten-workspace-tree`)を複数のキーに割り当てている。Codex/Cursorが他のキーを横取りしても、どれかは効くようにするため。
+- service modeを経由しないレイアウトリセット(`flatten-workspace-tree`)を複数のキーに割り当てている。Codexが他のキーを横取りしても、どれかは効くようにするため。
 
 ## その他の個別事情
 
