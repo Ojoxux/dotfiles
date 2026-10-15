@@ -5,13 +5,17 @@
 
   imports = [ ../modules/darwin.nix ];
 
-  homebrew.taps = [ "crmne/tap" ];
+  homebrew.taps = [
+    "crmne/tap"
+    "stablyai/orca"
+  ];
   homebrew.casks = [
     "google-chrome"
     "orbstack"
     "1password"
     "wireshark-app"
     "crmne/tap/fastpotify"
+    "stablyai/orca/orca"
   ];
 
   aerospaceCrackGap.enable = true;
