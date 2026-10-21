@@ -16,6 +16,7 @@ in
     brewCasks.arc
     brewCasks.figma
     brewCasks.webots
+    opencode
 
     (writeShellScriptBin "claude-nix" ''
       exec ${claude-code}/bin/claude "$@"
