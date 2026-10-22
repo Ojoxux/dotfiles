@@ -31,13 +31,6 @@ in
   nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = "aarch64-darwin";
 
-  security.pki.caCertificateBlacklist = [
-    "Comodo AAA Services root"
-    "emSign ECC Root CA - G3"
-    "emSign Root CA - C1"
-    "emSign ECC Root CA - C3"
-  ];
-
   nix.enable = false;
 
   system.activationScripts.preActivation.text = ''

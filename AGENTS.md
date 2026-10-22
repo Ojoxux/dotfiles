@@ -94,10 +94,6 @@ powehi固有機能。内蔵ディスプレイの割れた部分を避けるた�
 - service modeには`ctrl-shift-0`も割り当てている。`ctrl-shift-semicolon`はJISキーボードで押しにくく、Electronアプリに横取りされることもあるため。
 - service modeを経由しないレイアウトリセット(`flatten-workspace-tree`)を複数のキーに割り当てている。Codexが他のキーを横取りしても、どれかは効くようにするため。
 
-## eMudhra 中間CA漏洩の暫定対策 (`modules/darwin.nix`)
-
-2026-10 の eMudhra 中間CA秘密鍵漏洩 (nixpkgs#576485) への対策として、`security.pki.caCertificateBlacklist` で問題の中間CAにつながるルートを外している。NixOS は nixpkgs#576390 でモジュールのデフォルトになったので sgra 側には書いていないが、nix-darwin は対応PR (nix-darwin#1876) が未マージなので手で書いている。#1876 がマージされて `nix-darwin` input を更新したら消してよい。`Comodo AAA Services root` を外すのは上流と同じ判断 (Sectigo のクロス署名経由で問題の中間CAにつながるため)。
-
 ## その他の個別事情
 
 - **flake.lockの自動更新** (`.github/workflows/update-flake-lock.yml`): 毎週月曜0時(UTC)に`DeterminateSystems/update-flake-lock`が`nix flake update`してPRを作る。PRの作成までを自動化していて、マージと`task apply`は手元で確認してから行う。理由: nixpkgsが更新されると数百のderivationが再ビルドされることがあり、`darwin-rebuild`はmacOS専用でhomebrewや`--impure`も絡むためCIで実機と同じ検証ができない。`GITHUB_TOKEN`で作ったPRは他のworkflowを起動しない仕様なので、PRに対するCIは今のところ無い。
