@@ -6,7 +6,6 @@
   imports = [ ../modules/darwin.nix ];
 
   homebrew.taps = [
-    "crmne/tap"
     "stablyai/orca"
   ];
   homebrew.casks = [
@@ -14,7 +13,6 @@
     "orbstack"
     "1password"
     "wireshark-app"
-    "crmne/tap/fastpotify"
     "stablyai/orca/orca"
   ];
 

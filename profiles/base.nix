@@ -23,6 +23,7 @@
     bat
     jq
     yq-go
+    curl
     delta
 
     go-task
