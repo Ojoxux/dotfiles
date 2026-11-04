@@ -219,7 +219,6 @@ in
       upgrade = true;
     };
     casks = [
-      "visual-studio-code"
       "zed"
       "raycast"
     ];
