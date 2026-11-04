@@ -13,6 +13,10 @@
     },
     "model_parameters": [],
   },
+  "buffer_font_family": "Kibernetyk Mono",
+  "terminal": {
+    "font_family": "Kibernetyk Mono",
+  },
   "vim_mode": false,
   "base_keymap": "Cursor",
   "icon_theme": {
