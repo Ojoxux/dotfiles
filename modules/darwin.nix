@@ -57,7 +57,7 @@ in
       ProgramArguments = [
         "/nix/var/nix/profiles/default/bin/nix-collect-garbage"
         "--delete-older-than"
-        "30d"
+        "14d"
       ];
       StartCalendarInterval = [
         { Weekday = 0; Hour = 3; Minute = 0; }
